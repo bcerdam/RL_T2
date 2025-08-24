@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Problems.CookieProblem import CookieProblem
 from Problems.GridProblem import GridProblem
@@ -23,115 +24,87 @@ def sample_transition(transitions):
     prob, s_next, reward = transition
     return s_next, reward
 
-'''
-CODIGO ORIGINAL
-
-def play(problem):
-    state = problem.get_initial_state()
-    done = False
-    total_reward = 0.0
-    while not done:
-        problem.show(state)
-        actions = problem.get_available_actions(state)
-        action = get_action_from_user(actions)
-        transitions = problem.get_transitions(state, action)
-        s_next, reward = sample_transition(transitions)
-        done = problem.is_terminal(s_next)
-        state = s_next
-        total_reward += reward
-    print("Done.")
-    print(f"Total reward: {total_reward}")
-'''
 
 def bellman(actions, problem, state, V_s, gamma):
     pi = 1 / len(actions)
-    transitions = [problem.get_transitions(state, action) for action in actions] # [(p, (x+1, y+1), r), ...] # Problema esta en "_get_outcomes_when_agent_reaches_the_cookie", si llega a la galleta pone una lista nueva.
-    print(transitions)
-
     double_sum = 0
-    for transition in transitions:
-        if transition[0][1] not in V_s.keys():
-            double_sum += transition[0][0] * (transition[0][-1] + gamma*0)
-        else:
-            double_sum += transition[0][0] * (transition[0][-1] + gamma*V_s[transition[0][1]])
 
-    return pi*len(actions)*double_sum
+    for action in actions:
+        action_value = 0
+        transitions = problem.get_transitions(state, action)
+
+        for transition in transitions:
+            p, next_state, r = transition
+
+            if next_state in V_s.keys():
+                v_s_p = V_s[next_state]
+            else:
+                v_s_p = 0
+
+            action_value += p * (r + gamma*v_s_p)
+
+        double_sum += pi * action_value
+
+    return double_sum
+
 
 def play(problem, theta, gamma):
-    # state = problem.get_initial_state()
     done = False
-    total_reward = 0
-
     states = problem.states
-    # V_s = [0.0 for i in states]
     V_s = {}
+
     for state in states:
         if state not in V_s.keys():
             V_s[state] = 0
 
-    print(V_s)
+    deltas = []
 
     while not done:
         delta = 0
-        for idx, state in enumerate(states):
-            problem.show(state)
 
-            actions = problem.get_available_actions(state)
+        for state in states:
 
-            v_value = V_s[state]
-            V_s[state] = bellman(actions, problem, state, V_s, gamma)
-            delta = max(delta, np.abs(v_value - V_s[state]))
+            if problem.is_terminal(state):
+                continue
+            else:
+                actions = problem.get_available_actions(state)
+                v_value = V_s[state]
+                V_s[state] = bellman(actions, problem, state, V_s, gamma)
+                delta = max(delta, np.abs(v_value - V_s[state]))
+                deltas.append(delta)
 
-
-
-            # s_next, reward = sample_transition(transitions)
-            # done = problem.is_terminal(s_next)
-            # state = s_next
-            # total_reward += reward
         if delta < theta:
             done = True
 
-    # print("Done.")
-    # print(f"Total reward: {total_reward}")
+    return deltas
 
 
-
-def play_gambler_problem():
+def play_gambler_problem(theta, gamma):
     p = 0.4
     problem = GamblerProblem(p)
-    play(problem)
+    return play(problem, theta, gamma)
 
 
-def play_grid_problem():
+def play_grid_problem(theta, gamma):
     size = 4
     problem = GridProblem(size)
-    play(problem)
+    return play(problem, theta, gamma)
 
-
-'''
-CODIGO ORIGINAL
-
-def play_cookie_problem():
-    size = 3
-    problem = CookieProblem(size)
-    play(problem)
-'''
 
 def play_cookie_problem(theta, gamma):
     size = 3
     problem = CookieProblem(size)
-    play(problem, theta, gamma)
+    return play(problem, theta, gamma)
 
 
 if __name__ == '__main__':
-    '''
-    CODIGO ORIGINAL
-    
-    # play_grid_problem()
-    play_cookie_problem()
-    # play_gambler_problem()
-    '''
 
     THETA = 0.0000000001
     GAMMA = 0.99
-    play_cookie_problem(THETA, GAMMA)
+
+    # deltas = play_cookie_problem(THETA, GAMMA)
+    # deltas = play_grid_problem(THETA, GAMMA)
+    deltas = play_gambler_problem(THETA, GAMMA)
+
+    plt.plot(deltas)
+    plt.show()

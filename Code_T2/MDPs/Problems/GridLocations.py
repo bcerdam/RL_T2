@@ -37,7 +37,6 @@ class GridLocations:
 
     def get_next_location(self, current_location: int, action: str) -> int:
         coord_i, coord_j = self._get_coordinates(current_location)
-        print(f'i: {coord_i}, j: {coord_j}')
         if action == "left" and coord_j > 0:
             coord_j -= 1
         if action == "right" and coord_j < self.__grid_size - 1:
