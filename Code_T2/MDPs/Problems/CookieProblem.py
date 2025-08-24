@@ -29,12 +29,24 @@ class CookieProblem(AbstractProblem):
     def is_terminal(self, state: (int, int)) -> bool:
         return False
 
+    '''
+    CODIGO ORIGINAL
+    
     def get_transitions(self, state: (int, int), action: str) -> list[(float, (int, int), float)]:
         agent_location, cookie_location = state
         agent_next_location = self.__grid_locations.get_next_location(agent_location, action)
         if agent_next_location != cookie_location:
             return [(1.0, (agent_next_location, cookie_location), 0.0)]
         return self._get_outcomes_when_agent_reaches_the_cookie(agent_next_location)
+    '''
+    def get_transitions(self, state: (int, int), action: str) -> list[(float, (int, int), float)]:
+        agent_location, cookie_location = state
+        agent_next_location = self.__grid_locations.get_next_location(agent_location, action)
+        if agent_next_location != cookie_location:
+            return [(1.0, (agent_next_location, cookie_location), 0.0)]
+        else:
+            return [(1.0, (agent_next_location, cookie_location), 1.0)]
+        # return self._get_outcomes_when_agent_reaches_the_cookie(agent_next_location)
 
     def _get_outcomes_when_agent_reaches_the_cookie(self, agent_location: int) -> list[(float, (int, int), float)]:
         locations = self.__grid_locations.get_all_locations()
@@ -42,7 +54,7 @@ class CookieProblem(AbstractProblem):
         reward = 1.0
         outcomes = []
         for cookie_next_location in locations:
-            if agent_location != cookie_next_location:
+            if agent_location != cookie_next_location: # Cookie cannot be where agent is
                 outcomes.append((prob, (agent_location, cookie_next_location), reward))
         return outcomes
 
