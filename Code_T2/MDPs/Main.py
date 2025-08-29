@@ -186,6 +186,98 @@ def run_policy_iteration(problem, theta, gamma):
             return V_s_p, pi_p
         V_s = V_s_p
 
+'''
+pregunta h)
+funcion que contiene pipeline general para algoritmo 'Value Iteration' del libro de Sutton y Barto en el capitulo 4.4"
+'''
+
+
+def value_iteration(problem, theta, gamma):
+    states = problem.states
+
+    V_s = {}
+    for state in states:
+        if state not in V_s.keys():
+            V_s[state] = 0
+
+    not_converged = True
+    while not_converged:
+        delta = 0
+
+        for state in states:
+            if problem.is_terminal(state):
+                continue
+
+            V_s_p = V_s[state]
+            action_values = []
+            for action in problem.get_available_actions(state):
+                current_action_value = 0
+                transitions = problem.get_transitions(state, action)
+                for transition in transitions:
+                    p, next_state, r = transition
+                    current_action_value += p * (r + gamma * V_s.get(next_state, 0))
+                action_values.append(current_action_value)
+
+            V_s[state] = max(action_values)
+            delta = max(delta, abs(V_s_p - V_s[state]))
+
+        if delta < theta:
+            break
+    return V_s
+
+
+'''
+Pregunta i)
+funciones para poder plottear set de poltiicas optimas.
+'''
+
+def state_optimal_actions(problem, V_s, gamma):
+
+    states = []
+    for state in V_s.keys():
+        if problem.is_terminal(state):
+            continue
+        else:
+            states.append(state)
+
+    state_optimal_actions_dict = {}
+    for state in states:
+        actions = problem.get_available_actions(state)
+
+        q_dict = {}
+        for action in actions:
+            action_value = 0
+            transitions = problem.get_transitions(state, action)
+            for transition in transitions:
+                p, next_state, r = transition
+                action_value += p * (r + gamma * V_s.get(next_state, 0))
+            q_dict[action] = action_value
+
+        q_max = max(round(q_val, 5) for q_val in q_dict.values())
+        optimal_actions = [action for action, q_val in q_dict.items() if round(q_val, 5) == q_max]
+        state_optimal_actions_dict[state] = optimal_actions
+
+    return state_optimal_actions_dict
+
+
+def plot_optimal_pi(state_optimal_actions, p):
+    plt.figure(figsize=(12, 8))
+    plot_states = []
+    plot_actions = []
+    for state, actions in state_optimal_actions.items():
+        for action in actions:
+            plot_states.append(state)
+            plot_actions.append(action)
+
+    plt.scatter(plot_states, plot_actions, marker='.')
+    plt.title(f"Políticas Óptimas, GamblerProblem: (Probabilidad Cara = {p})", fontsize=16)
+    plt.xlabel("State", fontsize=12)
+    plt.ylabel("Action", fontsize=12)
+    plt.grid(True, linestyle='--')
+    plt.tight_layout()
+    # plt.savefig(f'/Users/brunocerdamardini/Desktop/RL_T2/resultados/pregunta_i_gambler_probabilidad_{p}.jpeg', dpi=500)
+    plt.show()
+
 def play_gambler_problem(p, theta, gamma):
     problem = GamblerProblem(p)
     V_s, deltas = play(problem, theta, gamma)
@@ -354,3 +446,88 @@ if __name__ == '__main__':
     '''
     Pregunta g)
     '''
+
+    '''
+    Pregunta h)
+    '''
+
+    # print("--- GridProblem START ---")
+    #
+    # THETA = 0.0000000001
+    #
+    # GAMMA = 1
+    # for size in range(3, 11):
+    #     problem = GridProblem(size)
+    #
+    #     start_time = time.time()
+    #     V_s_optimal = value_iteration(problem, THETA, GAMMA)
+    #     duration = time.time() - start_time
+    #
+    #     initial_state_value = V_s_optimal[problem.get_initial_state()]
+    #
+    #     print(f"Tamaño grilla: {size}; Valor Optimo estado inicial: {initial_state_value:.3f}; Tiempo Ejecucion: {duration:.3f}s")
+    #
+    # print("--- GridProblem END ---")
+
+    # print("--- CookieProblem START ---")
+    #
+    # THETA = 0.0000000001
+    #
+    # GAMMA = 0.99
+    # for size in range(3, 11):
+    #     problem = CookieProblem(size)
+    #
+    #     start_time = time.time()
+    #     V_s_optimal = value_iteration(problem, THETA, GAMMA)
+    #     duration = time.time() - start_time
+    #
+    #     initial_state_value = V_s_optimal[problem.get_initial_state()]
+    #
+    #     print(
+    #         f"Tamaño grilla: {size}; Valor Optimo estado inicial: {initial_state_value:.3f}; Tiempo Ejecucion: {duration:.3f}s")
+    #
+    # print("--- CookieProblem END ---")
+
+    # print("--- GamblerProblem START ---")
+    #
+    # THETA = 0.0000000001
+    #
+    # GAMMA = 1
+    # for p in [0.25, 0.4, 0.55]:
+    #     problem = GamblerProblem(p)
+    #
+    #     start_time = time.time()
+    #     V_s_optimal = value_iteration(problem, THETA, GAMMA)
+    #     duration = time.time() - start_time
+    #
+    #     initial_state_value = V_s_optimal[problem.get_initial_state()]
+    #
+    #     print(
+    #         f"Probabilidad Cara: {p}; Valor Optimo estado inicial: {initial_state_value:.3f}; Tiempo Ejecucion: {duration:.3f}s")
+    #
+    # print("--- GamblerProblem END ---")
+
+    '''
+        Pregunta h)
+    '''
+
+    '''
+        Pregunta i)
+    '''
+
+    # THETA = 0.0000000001
+    # GAMMA = 1
+    #
+    # for p in [0.25, 0.4, 0.55]:
+    #     problem = GamblerProblem(p)
+    #     V_s_optimal = value_iteration(problem, THETA, GAMMA)
+    #     state_optimal_actions_dict = state_optimal_actions(problem, V_s_optimal, GAMMA)
+    #     plot_optimal_pi(state_optimal_actions_dict, p)
+
+    '''
+        Pregunta i)
+    '''
+
+
+
+
