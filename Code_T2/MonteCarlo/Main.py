@@ -192,7 +192,7 @@ if __name__ == '__main__':
     #       N_CHECK_BLACKJACK, N_TEST_SIMULATIONS_BLACKJACK, N_RUNS_BLACKJACK, CTE_STEP_SIZE_BLACKJACK)
 
     # GAME_CLIFF = "Cliff Walking"
-    # GAME_ENVIRONMENT_CLIFF = CliffEnv(width=6)
+    # GAME_ENVIRONMENT_CLIFF = CliffEnv(width=12)
     # GAMMA_CLIFF = 1
     # EPSILON_CLIFF = 0.1
     # N_EPISODES_CLIFF = 2*10**5
